@@ -1,0 +1,1741 @@
+{
+	"info": {
+		"_postman_id": "e50741e6-baf4-463e-b5db-cb662560f679",
+		"name": "Cloudways_Unified",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Server Management - Manage Services",
+			"item": [
+				{
+					"name": "RefreshAuthToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0a2dc6a6-edb8-4076-9773-cf393b3b87d6",
+								"exec": [
+									"// Function to set headers\r",
+									"function setHeaders() {\r",
+									"    postman.setGlobalVariable('x-access-token', pm.collectionVariables.get('x-access-token'));\r",
+									"    postman.setGlobalVariable('x-device-id', pm.collectionVariables.get('x-device-id'));\r",
+									"    postman.setGlobalVariable('env', pm.collectionVariables.get('env'));\r",
+									"    // Add other headers as needed\r",
+									"}\r",
+									"\r",
+									"var data = pm.response.json();\r",
+									"var currentTime = new Date().getTime();\r",
+									"// var tokenExpirationTime = data.jwt.expires_at;\r",
+									"\r",
+									"// if (currentTime >= tokenExpirationTime) {\r",
+									"//     postman.setNextRequest('RefreshAuthToken');\r",
+									"// } else {\r",
+									"//     postman.setNextRequest(pm.collectionVariables.get('next_next_request'));\r",
+									"// }\r",
+									"\r",
+									"pm.collectionVariables.unset(\"x-access-token\");\r",
+									"pm.collectionVariables.set(\"x-access-token\", data.jwt.token);\r",
+									"pm.collectionVariables.unset(\"refresh_token\");\r",
+									"pm.collectionVariables.set(\"refresh_token\", data.jwt.refresh_token);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", () => {\r",
+									"    pm.expect(pm.response.code).to.eql(200);\r",
+									"});\r",
+									"\r",
+									"// Call the function to set headers for subsequent requests\r",
+									"setHeaders();\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "a76210b7-9f82-4696-af8e-5bd10006e954",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "456977b4-591f-41ce-bbe6-b4ae44b87a4e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "refresh_token",
+									"value": "{{refresh_token}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": "{{Prod_URL}}/guest/auth/refreshAuthToken"
+					},
+					"response": []
+				},
+				{
+					"name": "Access Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3d3dde4d-4510-449a-8c7f-ea0c617de3b1",
+								"exec": [
+									"// Parse the response body to extract the access token\r",
+									"try {\r",
+									"    const responseBody = pm.response.json();\r",
+									"    // Set the access token as an environment variable\r",
+									"    pm.collectionVariables.unset(\"access_token\");\r",
+									"    pm.collectionVariables.set(\"access_token\", responseBody.access_token);\r",
+									"    // Set the access token as the bearer token for the next requests\r",
+									"    pm.request.headers.upsert({\r",
+									"        key: 'Authorization',\r",
+									"        value: 'Bearer ' + pm.collectionVariables.get(\"access_token\")\r",
+									"    });\r",
+									"} catch (error) {\r",
+									"    console.error(\"Error extracting access token:\", error);\r",
+									"}\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "28a05d58-da27-479f-b6f7-07e4433c9782",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Prod_URL}}/oauth/access_token?email={{email}}&api_key={{api_key}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"oauth",
+								"access_token"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{email}}"
+								},
+								{
+									"key": "api_key",
+									"value": "{{api_key}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restart Apache Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// Parse the response JSON\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"// Check if the status is \"running\"\r",
+									"pm.test(\"Check if the status is running\", function () {\r",
+									"    pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "7b72ead9-2c4c-460d-b808-df902a552432",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "dd83040b-834b-4dd6-a765-9f358b203f18",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"server_id\": \"{{server_id}}\", \r\n     \"service\": \"apache2\", \r\n    \"state\": \"restart\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{Prod_URL}}/service/state"
+					},
+					"response": []
+				},
+				{
+					"name": "Restart Memcache Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// Parse the response JSON\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"// Check if the status is \"running\"\r",
+									"pm.test(\"Check if the status is running\", function () {\r",
+									"    pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "2dc003a9-b78d-4268-80ac-07d5a2f79ae3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"server_id\": \"{{server_id}}\", \r\n     \"service\": \"memcached\", \r\n    \"state\": \"restart\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{Prod_URL}}/service/state"
+					},
+					"response": []
+				},
+				{
+					"name": "Restart MySQL Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// Parse the response JSON\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"// Check if the status is \"running\"\r",
+									"pm.test(\"Check if the status is running\", function () {\r",
+									"    pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "4e009d5a-f1e0-474f-968f-06ae6db969b4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"server_id\": \"{{server_id}}\", \r\n     \"service\": \"mysql\", \r\n    \"state\": \"restart\"\r\n    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{Prod_URL}}/service/state"
+					},
+					"response": []
+				},
+				{
+					"name": "Restart Nginx Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// Parse the response JSON\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"// Check if the status is \"running\"\r",
+									"pm.test(\"Check if the status is running\", function () {\r",
+									"    pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "1cdb7f2d-b485-4567-9598-2003039def5e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"server_id\": \"{{server_id}}\", \r\n     \"service\": \"nginx\", \r\n    \"state\": \"restart\"\r\n    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{Prod_URL}}/service/state"
+					},
+					"response": []
+				},
+				{
+					"name": "Restart PHPFPM Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// Parse the response JSON\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"// Check if the status is \"running\"\r",
+									"pm.test(\"Check if the status is running\", function () {\r",
+									"    pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "e06b21fc-ba50-4bc1-8d5d-aebfc4795032",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"server_id\": \"{{server_id}}\", \r\n     \"service\": \"php8.1-fpm\", \r\n    \"state\": \"restart\"\r\n    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{Prod_URL}}/service/state"
+					},
+					"response": []
+				},
+				{
+					"name": "Service State",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cf0d7b6b-a511-4101-aadf-f6ad0107c572",
+								"exec": [
+									"pm.test(\"Status Code Should be 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"    // Parse the response JSON\r",
+									"    const responseJson = pm.response.json();\r",
+									"    // Get the status of Varnish & Redis\r",
+									"    const varnishStatus = responseJson.services.status.varnish;\r",
+									"    const redisStatus = responseJson.services.status['redis-server'];\r",
+									"    // Set the collection variable for varnish with the current status\r",
+									"    pm.collectionVariables.set('varnishStatus', varnishStatus);\r",
+									"    pm.collectionVariables.set('redisStatus', redisStatus)\r",
+									"\r",
+									"\r",
+									"// Check if the newrelic-sysmond status is \"stopped\"\r",
+									"pm.test(\"Check if newrelic-sysmond status is stopped\", function () {\r",
+									"    pm.expect(responseJson.services.status['newrelic-sysmond']).to.equal(\"stopped\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "1879d104-10d4-446d-b707-c1c374d8fe16",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/service?server_id={{server_id}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"service"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Varnish Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// Parse the response JSON\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"// Check if the status is \"running\"\r",
+									"pm.test(\"Check if the status is running\", function () {\r",
+									"    if(responseJson.service_status && responseJson.service_status.status == \"running\") {\r",
+									"        pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"    } else {\r",
+									"        pm.expect(responseJson.service_status.status).to.equal(\"stopped\");\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f755c78a-33aa-4a65-8c80-cbac4b4c5dac",
+								"exec": [
+									"// Get the current status of varnish from the collection variable\r",
+									"const varnishStatus = pm.collectionVariables.get('varnishStatus');\r",
+									"\r",
+									"// Determine the action based on varnish status\r",
+									"let varnishAction;\r",
+									"if (varnishStatus === \"running\") {\r",
+									"    varnishAction = \"disable\";\r",
+									"} else {\r",
+									"    varnishAction = \"enable\";\r",
+									"}\r",
+									"\r",
+									"// Set the server_id and action parameters at the collection level\r",
+									"pm.collectionVariables.set('varnishAction', varnishAction);\r",
+									"\r",
+									"// Log the action to the console\r",
+									"console.log(`Varnish status: ${varnishStatus}. Action: ${varnishAction}`);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "d500768b-97bc-4c37-aca2-50e9bab89106",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Prod_URL}}/service/varnish?server_id={{server_id}}&action={{varnishAction}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"service",
+								"varnish"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "action",
+									"value": "{{varnishAction}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Redis State",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6ec04b39-e8c0-40ac-8f12-a2228cf9c4b9",
+								"exec": [
+									"// // Parse the response JSON\r",
+									"// const responseJson = pm.response.json();\r",
+									"\r",
+									"// // Check if the status is \"running\"\r",
+									"// pm.test(\"Check if the status is running\", function () {\r",
+									"//     pm.expect(responseJson.service_status.status).to.equal(\"running\");\r",
+									"// });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f755c78a-33aa-4a65-8c80-cbac4b4c5dac",
+								"exec": [
+									"// Get the current status of varnish from the collection variable\r",
+									"const redisStatus = pm.collectionVariables.get('redisStatus');\r",
+									"\r",
+									"// Determine the action based on varnish status\r",
+									"let redisAction;\r",
+									"if (redisStatus === \"running\") {\r",
+									"    redisAction = \"stop\";\r",
+									"} else {\r",
+									"    redisAction = \"start\";\r",
+									"}\r",
+									"\r",
+									"// Set the server_id and action parameters at the collection level\r",
+									"pm.collectionVariables.set('redisAction', redisAction);\r",
+									"\r",
+									"// Log the action to the console\r",
+									"console.log(`Redis status: ${redisStatus}. Action: ${redisAction}`);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "317a96fd-8825-470d-9fd9-ad610469f19b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\r\n//     \"server_id\": \"{{server_id}}\",\r\n//      \"service\": \"redis-server\",\r\n//        \"state\": \"{{redisAction}}\"\r\n\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Prod_URL}}/service/state?server_id={{server_id}}&service=redis-server&state={{redisAction}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"service",
+								"state"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "service",
+									"value": "redis-server"
+								},
+								{
+									"key": "state",
+									"value": "{{redisAction}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4d5d7571-a270-45f4-bdf4-4e177ee68d55",
+			"description": "This section of the API Suites covers the End Point available in Manage Services Module under Server Management."
+		},
+		{
+			"name": "Server Backups",
+			"item": [
+				{
+					"name": "Backup Frequencies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "98ec0251-5097-457a-91fd-8c87b8bc3bcc",
+								"exec": [
+									"pm.test(\"Validate Status Code is 200\",function()\r",
+									"{\r",
+									"    pm.response.to.have.status(200);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "4f35863d-d1f5-4dbb-beab-43f85d846ff3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{Prod_URL}}/backup-frequencies"
+					},
+					"response": []
+				},
+				{
+					"name": "Server Backup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c4c8610c-c91f-44d9-81a5-953a51658006",
+								"exec": [
+									"pm.test(\"Validate The Reponse Returns 200 Status Code\", () => \r",
+									"{\r",
+									"    pm.response.to.have.status(200);\r",
+									"}); \r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "c358e011-1cbb-43cd-ac99-b0d3de33e264",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/server/manage/backup?server_id={{server_id}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"server",
+								"manage",
+								"backup"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Local Backups",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8f0c27db-6ddf-4537-a52b-508db84b7930",
+								"exec": [
+									"pm.test(\"Validate Status Code is 200\",function()\r",
+									"{\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "7375f6ee-3603-4e2f-86f9-52fba0526d29",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/server/manage/remove_local_backup?server_id={{server_id}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"server",
+								"manage",
+								"remove_local_backup"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Backup Settings",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "2faea20a-9872-4f88-bb44-0d86d9d36e11",
+								"exec": [
+									"// Define options for each parameter\r",
+									"const backupFrequencyOptions = ['1h', '3h', '6h', '12h', '1', '2', '3', '4', '5', '6', '7'];\r",
+									"const backupRetentionOptions = [8, 15, 22, 29];\r",
+									"const localBackupsOptions = [true, false];\r",
+									"\r",
+									"// Function to get a random element from an array\r",
+									"const getRandomElement = (array) => array[Math.floor(Math.random() * array.length)];\r",
+									"\r",
+									"// Set values for each parameter\r",
+									"const backupFrequency = getRandomElement(backupFrequencyOptions);\r",
+									"const backupRetention = getRandomElement(backupRetentionOptions);\r",
+									"\r",
+									"// Toggle the value of local_backups\r",
+									"const currentLocalBackups = pm.collectionVariables.get('local_backups');\r",
+									"const localBackups = currentLocalBackups === true ? false : true;\r",
+									"\r",
+									"// Set backup_time only if frequency is not in hours\r",
+									"let backupTime = '';\r",
+									"if (!backupFrequency.includes('h')) {\r",
+									"    backupTime = `${(Math.floor(Math.random() * 24)).toString().padStart(2, '0')}:${(Math.floor(Math.random() * 60)).toString().padStart(2, '0')}`;\r",
+									"}\r",
+									"\r",
+									"// Set collection-level variables\r",
+									"pm.collectionVariables.set('backup_frequency', backupFrequency);\r",
+									"pm.collectionVariables.set('backup_retention', backupRetention);\r",
+									"pm.collectionVariables.set('local_backups', localBackups);\r",
+									"pm.collectionVariables.set('backup_time', backupTime);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "5016c58a-ad96-4917-9479-d0c65e7e4de7",
+								"exec": [
+									"// Log the request data\r",
+									"console.log('Request Data:');\r",
+									"console.log('backup_frequency:', pm.collectionVariables.get('backup_frequency'));\r",
+									"console.log('backup_retention:', pm.collectionVariables.get('backup_retention'));\r",
+									"console.log('local_backups:', pm.collectionVariables.get('local_backups'));\r",
+									"console.log('backup_time:', pm.collectionVariables.get('backup_time'));\r",
+									"\r",
+									"// Validate 200 status\r",
+									"pm.test('Status code is 200', function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('Response Time Should Be < 1330', function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "007769b3-3e67-4442-bf7b-e1d1695d0e24",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/server/manage/backupSettings?server_id={{server_id}}&backup_frequency={{backup_frequency}}&backup_retention={{backup_retention}}&local_backups={{local_backups}}&backup_time={{backup_time}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"server",
+								"manage",
+								"backupSettings"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "backup_frequency",
+									"value": "{{backup_frequency}}"
+								},
+								{
+									"key": "backup_retention",
+									"value": "{{backup_retention}}"
+								},
+								{
+									"key": "local_backups",
+									"value": "{{local_backups}}"
+								},
+								{
+									"key": "backup_time",
+									"value": "{{backup_time}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "a250c8f4-73ad-45a7-9def-67197ec8f02d"
+		},
+		{
+			"name": "Access Details",
+			"item": [
+				{
+					"name": "Get App Access",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "a0baa686-e2dd-4b0f-ac0b-0348ac3de38f",
+								"exec": [
+									"// // Get the current access token from the environment\r",
+									"// const currentToken = pm.environment.get('x-access-token');\r",
+									"\r",
+									"// // Check if the token is expired\r",
+									"// if (isTokenExpired(currentToken)) {\r",
+									"//     // Token is expired, automatically refresh it\r",
+									"//     postman.setNextRequest('Refresh Auth Token'); // Replace with the name of the request that refreshes the token\r",
+									"// }\r",
+									"\r",
+									"// // Set the headers for the current request\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'x-access-token',\r",
+									"//     value: pm.environment.get('x-access-token')\r",
+									"// });\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'x-device-id',\r",
+									"//     value: pm.environment.get('x-device-id')\r",
+									"// });\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'env',\r",
+									"//     value: pm.environment.get('env')\r",
+									"// });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "ab3f0cd3-7e7c-4d34-8930-8d81d8291c83",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/app/getApplicationAccess?server_id={{server_id}}&app_id={{app_id}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"app",
+								"getApplicationAccess"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "app_id",
+									"value": "{{app_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create App Credentials",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "da99cc93-2e7d-4d8a-89d3-39a5c9dd847a",
+								"exec": [
+									"// Function to generate a random username\r",
+									"function generateRandomUsername() {\r",
+									"    const prefix = 'user';\r",
+									"    const randomNumber = Math.floor(Math.random() * 1000);\r",
+									"    return `${prefix}${randomNumber}`;\r",
+									"}\r",
+									"\r",
+									"// Set the generated random username as a collection variable\r",
+									"pm.collectionVariables.set('username', generateRandomUsername());\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "ceb8678b-3564-454a-8b3f-74cf0a3f4db9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/app/creds?server_id={{server_id}}&app_id={{app_id}}&username={{username}}&password=Cloud@123",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"app",
+								"creds"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "app_id",
+									"value": "{{app_id}}"
+								},
+								{
+									"key": "username",
+									"value": "{{username}}"
+								},
+								{
+									"key": "password",
+									"value": "Cloud@123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "App Access State",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "da99cc93-2e7d-4d8a-89d3-39a5c9dd847a",
+								"exec": [
+									"// // Get the current access token from the environment\r",
+									"// const currentToken = pm.environment.get('x-access-token');\r",
+									"\r",
+									"// // Check if the token is expired\r",
+									"// if (isTokenExpired(currentToken)) {\r",
+									"//     // Token is expired, automatically refresh it\r",
+									"//     postman.setNextRequest('Refresh Auth Token'); // Replace with the name of the request that refreshes the token\r",
+									"// }\r",
+									"\r",
+									"// // Set the headers for the current request\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'x-access-token',\r",
+									"//     value: pm.environment.get('x-access-token')\r",
+									"// });\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'x-device-id',\r",
+									"//     value: pm.environment.get('x-device-id')\r",
+									"// });\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'env',\r",
+									"//     value: pm.environment.get('env')\r",
+									"// });\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "03efb3b6-4fe7-4d32-a566-5ed179f36509",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/app/state?server_id={{server_id}}&app_id={{app_id}}&state=disable",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"app",
+								"state"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "app_id",
+									"value": "{{app_id}}"
+								},
+								{
+									"key": "state",
+									"value": "disable"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete App Credentials",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "da99cc93-2e7d-4d8a-89d3-39a5c9dd847a",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1963b428-aba2-400a-a340-e3c1294f23ac",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "aad50bc5-6285-4ee4-b4e2-74c392db7fbc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{Prod_URL}}/app/creds?server_id={{server_id}}&app_id={{app_id}}&app_cred_id={{idToDelete}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"app",
+								"creds"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "app_id",
+									"value": "{{app_id}}"
+								},
+								{
+									"key": "app_cred_id",
+									"value": "{{idToDelete}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get App Credentials",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "da99cc93-2e7d-4d8a-89d3-39a5c9dd847a",
+								"exec": [
+									"// // Get the current access token from the environment\r",
+									"// const currentToken = pm.environment.get('x-access-token');\r",
+									"\r",
+									"// // Check if the token is expired\r",
+									"// if (isTokenExpired(currentToken)) {\r",
+									"//     // Token is expired, automatically refresh it\r",
+									"//     postman.setNextRequest('Refresh Auth Token'); // Replace with the name of the request that refreshes the token\r",
+									"// }\r",
+									"\r",
+									"// // Set the headers for the current request\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'x-access-token',\r",
+									"//     value: pm.environment.get('x-access-token')\r",
+									"// });\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'x-device-id',\r",
+									"//     value: pm.environment.get('x-device-id')\r",
+									"// });\r",
+									"// pm.request.headers.add({\r",
+									"//     key: 'env',\r",
+									"//     value: pm.environment.get('env')\r",
+									"// });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1963b428-aba2-400a-a340-e3c1294f23ac",
+								"exec": [
+									"// Pre-request Script for the second request\r",
+									"\r",
+									"// Extract IDs from the response in the first request\r",
+									"const responseJson = pm.response.json();\r",
+									"const appCredsIds = responseJson.app_creds.map(cred => cred.id);\r",
+									"\r",
+									"// Randomly select an ID to delete\r",
+									"const randomIndex = Math.floor(Math.random() * appCredsIds.length);\r",
+									"const randomIdToDelete = appCredsIds[randomIndex];\r",
+									"\r",
+									"// Set the selected ID as a variable to be used in the request URL or body\r",
+									"pm.collectionVariables.set('idToDelete', randomIdToDelete);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "e0f615e6-1bce-4455-b954-13b75bb55fc3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Unified_URL}}/app/creds?server_id={{server_id}}&app_id={{app_id}}",
+							"host": [
+								"{{Unified_URL}}"
+							],
+							"path": [
+								"app",
+								"creds"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
+								},
+								{
+									"key": "app_id",
+									"value": "{{app_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "6fe381c7-eff9-4d25-abc2-475b8df35364",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "21a511b5-1901-477a-b3ab-52e0eeb21044",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1d6c61a8-da30-4666-b7cd-96ac5817f240",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "f78a1bf4-7f74-4849-9b2e-73206f83b125",
+				"type": "text/javascript",
+				"exec": [
+					"// try {",
+					"//     // Function to retrieve and set access token",
+					"//     const setAccessToken = () => {",
+					"//         // Check if access token exists in collection variables",
+					"//         const accessToken = pm.collectionVariables.get(\"access_token\");",
+					"//         if (!accessToken) {",
+					"//             console.error(\"Access token not found in collection variables.\");",
+					"//             return;",
+					"//         }",
+					"",
+					"//         // Set the access token as a bearer token in the request headers for all requests in the collection",
+					"//         pm.request.headers.add({",
+					"//             key: \"Authorization\",",
+					"//             value: `Bearer ${accessToken}`",
+					"//         });",
+					"//         console.log(\"Access token set for the request.\");",
+					"//     };",
+					"",
+					"//     // Call the function to set access token for all requests in the collection",
+					"//     setAccessToken();",
+					"// } catch (error) {",
+					"//     console.error(\"Error in pre-request script:\", error.message);",
+					"//     console.error(\"Stack trace:\", error.stack);",
+					"// }",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "a770a23d-6629-49fb-8cba-017a477c3163",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api_key",
+			"value": "SYkJkiwp70WJ6a2dFMBAUHVIXjI0D7",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "e9FdDbwnq8SRImBdiuCVf5L91rOzJ40iLLwsWsiH",
+			"type": "string"
+		},
+		{
+			"key": "Prod_URL",
+			"value": "https://api.cloudways.com/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": "emad.uddin@cloudways.com",
+			"type": "string"
+		},
+		{
+			"key": "server_id",
+			"value": "1207948",
+			"type": "string"
+		},
+		{
+			"key": "app_id",
+			"value": "4276600",
+			"type": "string"
+		},
+		{
+			"key": "app_name",
+			"value": "cqdbrzrhpe",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "emadushe14",
+			"type": "string"
+		},
+		{
+			"key": "idToDelete",
+			"value": "1253",
+			"type": "string"
+		},
+		{
+			"key": "varnishStatus",
+			"value": ""
+		},
+		{
+			"key": "redisStatus",
+			"value": ""
+		},
+		{
+			"key": "redisAction",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "varnishAction",
+			"value": ""
+		},
+		{
+			"key": "x-device-id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "env",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "x-access-token",
+			"value": ""
+		},
+		{
+			"key": "backup_frequency",
+			"value": ""
+		},
+		{
+			"key": "backup_retention",
+			"value": ""
+		},
+		{
+			"key": "local_backups",
+			"value": ""
+		},
+		{
+			"key": "backup_time",
+			"value": ""
+		}
+	]
+}
