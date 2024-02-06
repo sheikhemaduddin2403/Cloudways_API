@@ -1061,6 +1061,7 @@
 									"// Get the value of the 'local_backups' variable from collection variables\r",
 									"var localBackups = pm.collectionVariables.get('local_backups');\r",
 									"\r",
+									"\r",
 									"// Check if localBackups is true\r",
 									"if (localBackups === true) {\r",
 									"    // Perform the current request\r",
@@ -1080,6 +1081,8 @@
 									"            // Skip the request and print a message in the test tab\r",
 									"            console.log('Request skipped due to local_backups being false');\r",
 									"        }\r",
+									"\r",
+									"console.log('Constructed URL:', apiUrl);\r",
 									""
 								],
 								"type": "text/javascript"
