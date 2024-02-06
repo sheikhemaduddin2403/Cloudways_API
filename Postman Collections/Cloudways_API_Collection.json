@@ -1070,11 +1070,11 @@
 									"\r",
 									"    pm.sendRequest({\r",
 									"        method: 'GET',\r",
-									"        url: apiUrl,\r",
+									"        url: request.apiUrl,\r",
 									"        // other request parameters...\r",
 									"    }, function (err, response) {\r",
-									"        // Handle the response or any other logic here\r",
-									"\r",
+									"        //Errors\r",
+									"        console.error('Error occurred:', err);\r",
 									"        // Print the results in the test tab\r",
 									"        console.log(response);\r",
 									"    });\r",
@@ -1631,7 +1631,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "1c5ab255-dfc5-4751-8509-9f98ac65af8c",
+				"id": "bcf6aa2b-468f-413c-b8d2-b1bbc232d89e",
 				"type": "text/javascript",
 				"exec": [
 					"// try {",
@@ -1665,7 +1665,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "e7b00c24-e085-4acf-aba6-cdb6f12bba67",
+				"id": "f9998e8c-3aa0-4e7a-99d0-d720d3ba332e",
 				"type": "text/javascript",
 				"exec": [
 					""
