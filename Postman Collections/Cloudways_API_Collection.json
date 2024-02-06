@@ -906,73 +906,6 @@
 					"response": []
 				},
 				{
-					"name": "Delete Local Backups",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "8f0c27db-6ddf-4537-a52b-508db84b7930",
-								"exec": [
-									"pm.test(\"Validate Status Code is 200\",function()\r",
-									"{\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"id": "7375f6ee-3603-4e2f-86f9-52fba0526d29",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{access_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "x-access-token",
-								"value": "{{x-access-token}}",
-								"type": "text"
-							},
-							{
-								"key": "x-device-id",
-								"value": "{{x-device-id}}",
-								"type": "text"
-							},
-							{
-								"key": "env",
-								"value": "{{env}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{Prod_URL}}/server/manage/remove_local_backup?server_id={{server_id}}",
-							"host": [
-								"{{Prod_URL}}"
-							],
-							"path": [
-								"server",
-								"manage",
-								"remove_local_backup"
-							],
-							"query": [
-								{
-									"key": "server_id",
-									"value": "{{server_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Backup Settings",
 					"event": [
 						{
@@ -1097,6 +1030,107 @@
 								{
 									"key": "backup_time",
 									"value": "{{backup_time}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Local Backups",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8f0c27db-6ddf-4537-a52b-508db84b7930",
+								"exec": [
+									"pm.test(\"Validate Status Code is 200\",function()\r",
+									"{\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b3aa5e61-89a5-4cbf-a8c6-807a4f805b05",
+								"exec": [
+									"// Get the value of the 'local_backups' variable from collection variables\r",
+									"var localBackups = pm.collectionVariables.get('local_backups');\r",
+									"\r",
+									"// Check if localBackups is true\r",
+									"if (localBackups === true) {\r",
+									"    // Perform the current request\r",
+									"\r",
+									"    // Replace '{{Prod_URL}}' and '{{server_id}}' with the actual values\r",
+									"    var apiUrl = pm.variables.replaceIn('{{Prod_URL}}') + '/server/manage/remove_local_backup?server_id=' + pm.variables.replaceIn('{{server_id}}');\r",
+									"\r",
+									"    pm.sendRequest({\r",
+									"        method: 'GET',\r",
+									"        url: apiUrl,\r",
+									"        // other request parameters...\r",
+									"    }, function (err, response) {\r",
+									"        // Handle the response or any other logic here\r",
+									"\r",
+									"        // Print the results in the test tab\r",
+									"        console.log(response);\r",
+									"    });\r",
+									"} else {\r",
+									"    // Skip the request and print a message in the test tab\r",
+									"    console.log('Request skipped due to local_backups being false');\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "7375f6ee-3603-4e2f-86f9-52fba0526d29",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{access_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{x-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-device-id",
+								"value": "{{x-device-id}}",
+								"type": "text"
+							},
+							{
+								"key": "env",
+								"value": "{{env}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{Prod_URL}}/server/manage/remove_local_backup?server_id={{server_id}}",
+							"host": [
+								"{{Prod_URL}}"
+							],
+							"path": [
+								"server",
+								"manage",
+								"remove_local_backup"
+							],
+							"query": [
+								{
+									"key": "server_id",
+									"value": "{{server_id}}"
 								}
 							]
 						}
@@ -1597,7 +1631,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "f78a1bf4-7f74-4849-9b2e-73206f83b125",
+				"id": "1c5ab255-dfc5-4751-8509-9f98ac65af8c",
 				"type": "text/javascript",
 				"exec": [
 					"// try {",
@@ -1631,7 +1665,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "a770a23d-6629-49fb-8cba-017a477c3163",
+				"id": "e7b00c24-e085-4acf-aba6-cdb6f12bba67",
 				"type": "text/javascript",
 				"exec": [
 					""
