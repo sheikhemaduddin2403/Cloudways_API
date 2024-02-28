@@ -212,17 +212,20 @@
 							{
 								"key": "x-access-token",
 								"value": "{{x-access-token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "x-device-id",
 								"value": "{{x-device-id}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "env",
 								"value": "{{env}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"body": {
@@ -276,17 +279,20 @@
 							{
 								"key": "x-access-token",
 								"value": "{{x-access-token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "x-device-id",
 								"value": "{{x-device-id}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "env",
 								"value": "{{env}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"body": {
@@ -339,17 +345,20 @@
 							{
 								"key": "x-access-token",
 								"value": "{{x-access-token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "x-device-id",
 								"value": "{{x-device-id}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "env",
 								"value": "{{env}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"body": {
@@ -920,17 +929,20 @@
 							{
 								"key": "x-access-token",
 								"value": "{{x-access-token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "x-device-id",
 								"value": "{{x-device-id}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "env",
 								"value": "{{env}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
@@ -991,30 +1003,50 @@
 							"script": {
 								"id": "b3aa5e61-89a5-4cbf-a8c6-807a4f805b05",
 								"exec": [
+									"// // Get the value of the 'local_backups' variable from collection variables\r",
+									"// var localBackups = pm.collectionVariables.get('local_backups');\r",
+									"\r",
+									"\r",
+									"// // Check if localBackups is true\r",
+									"// if (localBackups === true) {\r",
+									"//     // Perform the current request\r",
+									"\r",
+									"//     var apiUrl = pm.variables.replaceIn('{{Prod_URL}}') + '/server/manage/remove_local_backup?server_id=' + pm.variables.replaceIn('{{server_id}}');\r",
+									"\r",
+									"//     pm.sendRequest({\r",
+									"//         method: 'GET',\r",
+									"//         url: request.apiUrl,\r",
+									"//         // other request parameters...\r",
+									"//     },\r",
+									"//      function (err, response) {\r",
+									"//         console.log(response);\r",
+									"//     });\r",
+									"//         } else {\r",
+									"//             // Skip the request and print a message in the test tab\r",
+									"//             console.log('Request skipped due to local_backups being false');\r",
+									"//         }\r",
+									"\r",
+									"// console.log('Constructed URL:', apiUrl);\r",
+									"\r",
+									"\r",
 									"// Get the value of the 'local_backups' variable from collection variables\r",
 									"var localBackups = pm.collectionVariables.get('local_backups');\r",
-									"\r",
 									"\r",
 									"// Check if localBackups is true\r",
 									"if (localBackups === true) {\r",
 									"    // Perform the current request\r",
-									"\r",
-									"    //var apiUrl = pm.variables.replaceIn('{{Prod_URL}}') + '/server/manage/remove_local_backup?server_id=' + pm.variables.replaceIn('{{server_id}}');\r",
-									"\r",
 									"    pm.sendRequest({\r",
 									"        method: 'GET',\r",
-									"        url: request.url,\r",
+									"        url: request.url,  // Use the current request's URL\r",
 									"        // other request parameters...\r",
 									"    },\r",
-									"     function (err, response) {\r",
+									"    function (err, response) {\r",
 									"        console.log(response);\r",
 									"    });\r",
-									"        } else {\r",
-									"            // Skip the request and print a message in the test tab\r",
-									"            console.log('Request skipped due to local_backups being false');\r",
-									"        }\r",
-									"\r",
-									"console.log('Constructed URL:', url);\r",
+									"} else {\r",
+									"    // Skip the request and print a message in the test tab\r",
+									"    console.log('Request skipped due to local_backups being false');\r",
+									"}\r",
 									""
 								],
 								"type": "text/javascript"
@@ -1037,17 +1069,20 @@
 							{
 								"key": "x-access-token",
 								"value": "{{x-access-token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "x-device-id",
 								"value": "{{x-device-id}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "env",
 								"value": "{{env}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
@@ -1104,17 +1139,20 @@
 							{
 								"key": "x-access-token",
 								"value": "{{x-access-token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "x-device-id",
 								"value": "{{x-device-id}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							},
 							{
 								"key": "env",
 								"value": "{{env}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
@@ -1631,7 +1669,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "bcf6aa2b-468f-413c-b8d2-b1bbc232d89e",
+				"id": "df8820ea-a0e6-449f-9478-6c21da24b415",
 				"type": "text/javascript",
 				"exec": [
 					"// try {",
@@ -1665,7 +1703,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "f9998e8c-3aa0-4e7a-99d0-d720d3ba332e",
+				"id": "1a94bd31-9aff-42c1-bbea-48c03181b7df",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1676,12 +1714,12 @@
 	"variable": [
 		{
 			"key": "api_key",
-			"value": "SYkJkiwp70WJ6a2dFMBAUHVIXjI0D7",
+			"value": "WWX0hIU5ZITMei3NYnRU6SIhx1RLIW",
 			"type": "string"
 		},
 		{
 			"key": "access_token",
-			"value": "e9FdDbwnq8SRImBdiuCVf5L91rOzJ40iLLwsWsiH",
+			"value": "eYrYnjgvzKO9WPAJipZ7SoEdgp3i47gh5C6EfxWu",
 			"type": "string"
 		},
 		{
@@ -1691,7 +1729,7 @@
 		},
 		{
 			"key": "email",
-			"value": "emad.uddin@cloudways.com",
+			"value": "emaduddin@digitalocean.com",
 			"type": "string"
 		},
 		{
