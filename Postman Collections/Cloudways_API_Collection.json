@@ -710,7 +710,8 @@
 									"// });\r",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -732,11 +733,12 @@
 									"// Set the server_id and action parameters at the collection level\r",
 									"pm.collectionVariables.set('redisAction', redisAction);\r",
 									"\r",
-									"// Log the action to the console\r",
+									"// Log the action to the console - Test Comment\r",
 									"console.log(`Redis status: ${redisStatus}. Action: ${redisAction}`);\r",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
