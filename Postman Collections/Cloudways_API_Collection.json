@@ -43,7 +43,7 @@
 									"    pm.expect(pm.response.code).to.eql(200);\r",
 									"});\r",
 									"\r",
-									"// Call the function to set headers for subsequent requests\r",
+									"// Call the function to set headers for subsequent requests test comment\r",
 									"setHeaders();\r",
 									""
 								],
