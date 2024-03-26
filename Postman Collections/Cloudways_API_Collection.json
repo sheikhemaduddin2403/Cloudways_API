@@ -43,11 +43,12 @@
 									"    pm.expect(pm.response.code).to.eql(200);\r",
 									"});\r",
 									"\r",
-									"// Call the function to set headers for subsequent requests test comment\r",
+									"// Call the function to set headers for subsequent requests \r",
 									"setHeaders();\r",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -57,7 +58,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
